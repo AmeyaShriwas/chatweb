@@ -1,7 +1,7 @@
 import React from "react";
 import {BrowserRouter as Router, Route, Routes, BrowserRouter} from 'react-router-dom'
-import Authentication from "../Components/Authentication";
 import Dashboard from "../Components/Dashboard";
+import Authentication from "../Pages/AuthenticationPage";
 
 const AppNavigation = ()=> {
    return (
