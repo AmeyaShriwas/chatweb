@@ -1,19 +1,31 @@
-import React, { useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import { Form, Button, Spinner } from 'react-bootstrap';
 import { MdAlternateEmail } from "react-icons/md";
 import { TbLockPassword } from "react-icons/tb";
 
-const UpdatePassword = (props) => {
+interface UpdatePasswordProps {
+    setFormSelected:(form: string)=> void
+}
+
+interface UpdatePasswordData {
+    email: string,
+    password: string,
+    confirmPassword: string
+}
+
+const UpdatePassword:React.FC<UpdatePasswordProps> = (props) => {
     const { setFormSelected } = props;
-    const [data, setData] = useState({
+    const [data, setData] = useState<UpdatePasswordData>({
         email: "",
         password: "",
         confirmPassword: "",
     });
-    const [error, setError] = useState({});
-    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<UpdatePasswordData>({  email: "",
+        password: "",
+        confirmPassword: "",});
+    const [loading, setLoading] = useState<boolean>(false);
 
-    const handleInputChange = (e) => {
+    const handleInputChange = (e:ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setData((prev) => ({
             ...prev,
@@ -22,7 +34,7 @@ const UpdatePassword = (props) => {
     };
 
     const validateForm = () => {
-        const errors = {};
+        const errors:Partial<UpdatePasswordData> = {};
         // Email Validation
         if (!data.email) {
             errors.email = "Email is required.";
@@ -42,7 +54,7 @@ const UpdatePassword = (props) => {
             errors.confirmPassword = "Passwords do not match.";
         }
 
-        setError(errors);
+        setError(errors as UpdatePasswordData);
         return Object.keys(errors).length === 0;
     };
 

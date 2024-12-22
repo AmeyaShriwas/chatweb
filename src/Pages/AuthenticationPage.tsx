@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react'
 
-import Login from './../Components/Authentication/Login'
-import Signup from './../Components/Authentication/Signup'
-import ForgotPassword from './../Components/Authentication/ForgotPassword'
+import Login from '../Components/Authentication/Login'
+import Signup from '../Components/Authentication/Signup'
+import ForgotPassword from '../Components/Authentication/ForgotPassword'
 import VerifyOtp from '../Components/Authentication/VerifyOtp'
 import UpdatePassword from '../Components/Authentication/UpdatePassword'
+import { BG_Color } from '../Constants/Colors'
 
 
 
 const Authentication = () => {
-    const [formSelected, setFormSelected] = useState('login')
+    const [formSelected, setFormSelected] = useState<string>('login')
  
     const UiToRender = ()=> {
       if(formSelected === 'login'){
@@ -59,8 +60,8 @@ const Authentication = () => {
         )
     }
     return (
-        <div className="container-fluid d-flex justify-content-center align-items-center w-60" style={{backgroundColor:'#F5F5F5', height:`100vh`}} >
-         <div class='w-80 p-4'>
+        <div className="container-fluid d-flex justify-content-center align-items-center w-60" style={{backgroundColor:BG_Color, height:`100vh`}} >
+         <div className='w-80 p-4'>
           {UiToRender()}
           </div>
         </div>

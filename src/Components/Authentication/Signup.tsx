@@ -1,16 +1,27 @@
-import React, { useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import { MdAlternateEmail } from "react-icons/md";
 import { TbLockPassword } from "react-icons/tb";
 import { Form, Button, Spinner } from 'react-bootstrap';
 import { CiUser } from "react-icons/ci";
 
-const Signup = (props) => {
-    const { setFormSelected } = props;
-    const [data, setData] = useState({ name: "", email: "", password: "" });
-    const [error, setErrors] = useState({});
-    const [loading, setLoading] = useState(false);
+interface SignupProps {
+    setFormSelected: (form: string) => void
+}
 
-    const handleInputChange = (e) => {
+interface SignupData {
+    name: string,
+    email: string,
+    password: string
+}
+
+
+const Signup: React.FC<SignupProps> = (props) => {
+    const { setFormSelected } = props;
+    const [data, setData] = useState<SignupData>({ name: "", email: "", password: "" });
+    const [error, setErrors] = useState<SignupData>({name: '', email: '', password: ''});
+    const [loading, setLoading] = useState<boolean>(false);
+
+    const handleInputChange = (e:ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setData((prev) => ({
             ...prev,
@@ -19,7 +30,7 @@ const Signup = (props) => {
     };
 
     const validateErrors = () => {
-        const errors = {};
+        const errors:Partial<SignupData> = {};
 
         // Name validation
         if (data.name.trim().length === 0) {
@@ -44,7 +55,7 @@ const Signup = (props) => {
             errors.password = "Password must contain at least one special character";
         }
 
-        setErrors(errors);
+        setErrors(errors as SignupData);
         return Object.keys(errors).length === 0;
     };
 

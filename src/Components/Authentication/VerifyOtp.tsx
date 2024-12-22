@@ -2,7 +2,11 @@ import React from 'react';
 import { MdAlternateEmail } from "react-icons/md";
 import { Form, Button } from 'react-bootstrap';
 
-const VerifyOtp = ({ setFormSelected }) => {
+interface VerifyOtpProps {
+     setFormSelected: (form: string) => void
+}
+
+const VerifyOtp:React.FC<VerifyOtpProps> = ({ setFormSelected }) => {
   return (
     <div 
       className="w-100 p-3" 

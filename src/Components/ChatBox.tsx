@@ -7,9 +7,9 @@ import { IoSend } from "react-icons/io5";
 
 
 const ChatBox = () => {
-    const [screenHeight, setScreenHeight] = useState(window.innerHeight);
-    const [mobileWidth, setMobileWidth] = useState(window.innerWidth)
-    const [mobileScreen, setMobileScreen] = useState(false)
+    const [screenHeight, setScreenHeight] = useState<number>(window.innerHeight);
+    const [mobileWidth, setMobileWidth] = useState<number>(window.innerWidth)
+    const [mobileScreen, setMobileScreen] = useState<boolean>(false)
 
     useEffect(()=> {
         const fetchWidth = ()=> {

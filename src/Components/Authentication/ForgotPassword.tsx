@@ -1,14 +1,22 @@
-import React, { useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import { MdAlternateEmail } from "react-icons/md";
 import { Form, Button, Spinner } from 'react-bootstrap';
 
-const ForgotPassword = (props) => {
-    const { setFormSelected } = props;
-    const [data, setData] = useState({ email: "" });
-    const [error, setErrors] = useState({});
-    const [loading, setLoading] = useState(false);
+interface ForgotPasswordProps {
+    setFormSelected : (form: string) => void
+}
 
-    const handleInputChange = (e) => {
+interface ForgotPasswordData {
+    email: string
+}
+
+const ForgotPassword:React.FC<ForgotPasswordProps> = (props) => {
+    const { setFormSelected } = props;
+    const [data, setData] = useState<ForgotPasswordData>({ email: "" });
+    const [error, setErrors] = useState<ForgotPasswordData>({email: ''});
+    const [loading, setLoading] = useState<boolean>(false);
+
+    const handleInputChange = (e:ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setData((prev) => ({
             ...prev,
@@ -17,7 +25,7 @@ const ForgotPassword = (props) => {
     };
 
     const validateErrors = () => {
-        const errors = {};
+        const errors:Partial<ForgotPasswordData> = {};
 
         // Email validation
         if (data.email.length === 0) {
@@ -26,7 +34,7 @@ const ForgotPassword = (props) => {
             errors.email = "Please enter a valid email address";
         }
 
-        setErrors(errors);
+        setErrors(errors as ForgotPasswordData);
         return Object.keys(errors).length === 0;
     };
 

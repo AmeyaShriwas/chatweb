@@ -2,16 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
 import { CiUser, CiLogout } from "react-icons/ci";
 import { FiMessageSquare } from "react-icons/fi";
-
 import Chat from './Chat';
 import Profile from './Profile';
 
 const Dashboard = () => {
 
-    const [mobileWidth, setMobileWidth] = useState(true)
-    const [height, setHeight] = useState(window.innerHeight)
-    const [width, setWidth] = useState(window.innerWidth)
-    const [selectedCategory, setSelectedCategory] = useState('chat')
+    const [mobileWidth, setMobileWidth] = useState<boolean>(true)
+    const [height, setHeight] = useState<number>(window.innerHeight)
+    const [selectedCategory, setSelectedCategory] = useState<String>('chat')
 
     useEffect(() => {
         const fetchWidth = () => {
@@ -28,9 +26,9 @@ const Dashboard = () => {
 
     }, [])
 
-   const RenderFunction = (category)=> {
+   const RenderFunction = (category:String)=> {
     if(category === 'chat'){
-        return <Chat containerHeight={containerHeight} width={width} mobileWidth={mobileWidth}/>
+        return <Chat containerHeight={containerHeight} mobileWidth={mobileWidth}/>
     }
     if(category === 'profile'){
         return <Profile/>

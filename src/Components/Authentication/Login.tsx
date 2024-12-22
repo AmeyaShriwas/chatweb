@@ -1,18 +1,25 @@
-import React, { useState } from 'react'
+import React, { useState, ChangeEvent } from 'react'
 import { MdAlternateEmail } from "react-icons/md";
 import {Form, Button, Spinner} from 'react-bootstrap'
 import { TbLockPassword } from "react-icons/tb";
 
+interface LoginProps {
+    setFormSelected: (form: string) => void
+}
 
+interface LoginData {
+    email: string,
+    password: string
+}
 
-const Login = (props) => {
+const Login:React.FC<LoginProps> = (props) => {
     const {setFormSelected}=  props
-    const [data, setData] = useState({email: "", password: ""})
-    const [error, setErrors] = useState({})
-    const [loading, setLoading] = useState(false); // Loading state
+    const [data, setData] = useState<LoginData>({email: "", password: ""})
+    const [error, setErrors] = useState<LoginData>({email: '', password: ''})
+    const [loading, setLoading] = useState<boolean>(false); // Loading state
 
 
-    const handleInputChange = (e)=> {
+    const handleInputChange = (e: ChangeEvent<HTMLInputElement>)=> {
       const {name, value} = e.target
       setData((prev)=> ({
          ...prev,
@@ -21,7 +28,7 @@ const Login = (props) => {
     }
 
     const validErros = () => {
-        const error = {}; // Initialize the error object
+        const error:Partial<LoginData> = {}; // Initialize the error object
     
         // Email validation
         if (data.email.length === 0) {
@@ -40,7 +47,7 @@ const Login = (props) => {
         } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(data.password)) {
             error.password = 'Password must contain at least one special character';
         }
-            setErrors(error);
+            setErrors(error as LoginData);
         return Object.keys(error).length === 0;
     };
     
@@ -105,7 +112,7 @@ const Login = (props) => {
                 <Form.Group className="mb-4 w-100">
                     <Button className="w-100" variant="dark" onClick={handleSubmit} >
                         {loading ? 
-                       <span class="spinner-border text-light bg-dark" role="status">
+                       <span className="spinner-border text-light bg-dark" role="status">
                      </span>: 'Login'}
                        
                     </Button>
