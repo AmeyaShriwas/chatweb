@@ -10,6 +10,7 @@ import { BG_Color } from '../Constants/Colors'
 
 
 const Authentication = () => {
+  const logo: string = require('./../assets/logo.png')
     const [formSelected, setFormSelected] = useState<string>('login')
  
     const UiToRender = ()=> {
@@ -62,6 +63,7 @@ const Authentication = () => {
     return (
         <div className="container-fluid d-flex justify-content-center align-items-center w-60" style={{backgroundColor:BG_Color, height:`100vh`}} >
          <div className='w-80 p-4'>
+         <img style={{width:'120px'}} src={logo}/>
           {UiToRender()}
           </div>
         </div>

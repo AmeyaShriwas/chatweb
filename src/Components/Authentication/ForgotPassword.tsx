@@ -99,7 +99,7 @@ const ForgotPassword:React.FC<ForgotPasswordProps> = (props) => {
                 </Form.Group>
 
                 <Form.Group
-                    className="mb-3 w-100 d-flex justify-content-center"
+                    className="mb-3 w-100 d-flex justify-content-center cursor-pointer" style={{cursor:'pointer'}}
                     onClick={() => setFormSelected('signup')}
                 >
                     <p className="text-decoration-none text-secondary">

@@ -118,11 +118,11 @@ const Login:React.FC<LoginProps> = (props) => {
                     </Button>
                 </Form.Group>
 
-                <Form.Group className="mb-3 w-100 d-flex justify-content-center" onClick={()=> setFormSelected('forgotPassword')}>
-                    <p className="text-decoration-none text-dark">Forgot your password?</p>
+                <Form.Group className="mb-3 w-100 d-flex justify-content-center cursor-pointer" style={{cursor:'pointer'}} onClick={()=> setFormSelected('forgotPassword')}>
+                    <p className="text-decoration-none text-dark cursor-pointer ">Forgot your password?</p>
                 </Form.Group>
 
-                <Form.Group className="mb-3 w-100 d-flex justify-content-center" onClick={()=> setFormSelected('signup')}>
+                <Form.Group className="mb-3 w-100 d-flex justify-content-center cursor-pointer" style={{cursor:'pointer'}} onClick={()=> setFormSelected('signup')}>
                     <p className="text-decoration-none text-secondary">
                         Don't have an account? <span className="font-weight-bold text-dark">Sign up now</span>
                     </p>

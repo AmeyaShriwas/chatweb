@@ -6,6 +6,7 @@ import Chat from './Chat';
 import Profile from './Profile';
 
 const Dashboard = () => {
+    const logo: string = require('./../assets/logo.png')
 
     const [mobileWidth, setMobileWidth] = useState<boolean>(true)
     const [height, setHeight] = useState<number>(window.innerHeight)
@@ -42,7 +43,7 @@ const Dashboard = () => {
         <div style={{ height: `${height}` }}>
             <Navbar className='container-fluid sticky-top border p-2' expand="lg" style={{ height: `${navbarHeight}` }}>
                 <Container className='container-fluid p-2'>
-                    <Navbar.Brand onClick={()=>setSelectedCategory('chat')}  href="#">ChatWeb</Navbar.Brand>
+                    <Navbar.Brand onClick={()=>setSelectedCategory('chat')}  href="#">   <img style={{width:'100px'}} src={logo}/></Navbar.Brand>
                     <Navbar.Toggle aria-controls="navbarNav" />
                     <Navbar.Collapse id="navbarNav" className='text-align-right '>
                         <Nav className="ms-auto">

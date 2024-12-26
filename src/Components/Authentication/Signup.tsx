@@ -137,7 +137,7 @@ const Signup: React.FC<SignupProps> = (props) => {
                     </Button>
                 </Form.Group>
 
-                <Form.Group className="mb-3 w-100 d-flex justify-content-center" onClick={() => setFormSelected('login')}>
+                <Form.Group className="mb-3 w-100 d-flex justify-content-center cursor-pointer" style={{cursor:'pointer'}} onClick={() => setFormSelected('login')}>
                     <p className="text-decoration-none text-secondary">
                         Already have an account? <span className="font-weight-bold text-dark">Login now</span>
                     </p>
