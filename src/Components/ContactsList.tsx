@@ -2,7 +2,12 @@ import React from 'react';
 import { FaRegUserCircle } from "react-icons/fa";
 import {Form} from 'react-bootstrap'
 
-const ContactsList = () => {
+interface props {
+  setMobileWidth: (form: boolean)=> void
+}
+
+const ContactsList:React.FC<props> = (props) => {
+  const {setMobileWidth} = props
   // Dummy data for contacts
   const contacts = [
     { name: "Ameya Shriwas", time: "12:45 PM" },
@@ -37,6 +42,8 @@ const ContactsList = () => {
         {contacts.map((contact, index) => (
           <li
             key={index}
+            onClick={()=> setMobileWidth(true)}
+            style={{cursor:'pointer'}}
             className="list-group-item d-flex justify-content-between align-items-center"
           >
             <div className="container-fluid d-flex align-items-center">
@@ -51,6 +58,7 @@ const ContactsList = () => {
           </li>
         ))}
         </div>
+        
       </ul>
    
   );

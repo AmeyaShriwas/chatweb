@@ -9,7 +9,7 @@ const AppNavigation = ()=> {
     <BrowserRouter>
     <Routes>
         <Route path="/" Component={Authentication}/>
-        <Route path="/dashboard" Component={Dashboard}/>
+        <Route path="/chat" Component={Dashboard}/>
     </Routes>
     </BrowserRouter>
    )

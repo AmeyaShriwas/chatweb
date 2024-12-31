@@ -8,6 +8,13 @@ const Profile = () => {
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState(1); // Step: 1 -> Enter Email, 2 -> Verify OTP
   const [width, setWidth] = useState(window.innerWidth)
+  const [isPhone, setIsPhone] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsPhone(window.innerWidth <= 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
 
   useEffect(() => {
@@ -52,17 +59,66 @@ const Profile = () => {
           <h4 className="text-center mb-4">Profile Details</h4>
 
           {/* Profile Image Upload */}
-          <div className="text-center mb-4" style={{ position: "relative" }}>
-            <img
-              src={profile}
-              alt="Profile"
-              className="rounded-circle mb-3"
-              style={{ width: "150px", height: "150px", objectFit: "cover" }}
-            />
-            <div style={{ position: "absolute", bottom: "5px", right: "5px" }}>
-              <VscAdd />
-            </div>
-          </div>
+          <div
+      style={{
+        display: "flex",
+        flexDirection: isPhone ? "column" : "row", // Stack vertically on phones
+        justifyContent: isPhone ? "center" : "space-around",
+        alignItems: isPhone ? "center" : "flex-start",
+        gap: "20px", // Spacing between elements
+      }}
+    >
+      <div
+        className="text-center mb-4"
+        style={{
+          position: "relative",
+          width: "200px",
+          margin: isPhone ? "10px auto" : "0",
+        }}
+      >
+        <img
+          src={profile}
+          alt="Profile"
+          className="rounded-circle mb-3"
+          style={{
+            height: "200px",
+            objectFit: "cover",
+            border: "1px solid grey",
+            borderRadius: "50%",
+            width: "100%",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            top: "5px",
+            right: "5px",
+          }}
+        >
+          <VscAdd size={30} />
+        </div>
+      </div>
+      <div
+        style={{
+          width: isPhone ? "90%" : "300px",
+          margin: isPhone ? "10px auto" : "0",
+        }}
+      >
+        <div style={{ padding: "5px" }}>Add your status</div>
+        <input
+          style={{
+            borderRadius: "5px",
+            border: "none",
+            backgroundColor: "#F5F5F5",
+            padding: "10px",
+            width: "100%",
+          }}
+          type="text"
+          placeholder="add your status"
+        />
+      </div>
+    </div>
+
 
           {/* User Details Form */}
           <form>
