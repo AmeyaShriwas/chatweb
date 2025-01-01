@@ -2,6 +2,8 @@ import React, { useState, ChangeEvent } from 'react'
 import { MdAlternateEmail } from "react-icons/md";
 import {Form, Button, Spinner} from 'react-bootstrap'
 import { TbLockPassword } from "react-icons/tb";
+import { login } from '../../Redux/Slices/AuthenticationSlice';
+import { useDispatch } from 'react-redux';
 
 interface LoginProps {
     setFormSelected: (form: string) => void
@@ -17,6 +19,7 @@ const Login:React.FC<LoginProps> = (props) => {
     const [data, setData] = useState<LoginData>({email: "", password: ""})
     const [error, setErrors] = useState<LoginData>({email: '', password: ''})
     const [loading, setLoading] = useState<boolean>(false); // Loading state
+    const dispatch = useDispatch()
 
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>)=> {
@@ -59,6 +62,7 @@ const Login:React.FC<LoginProps> = (props) => {
                 setLoading(false)
             }, 2000)
             console.log('Login data:', data); // Proceed if no errors
+            dispatch(login(data) as any)
         }
     };
 

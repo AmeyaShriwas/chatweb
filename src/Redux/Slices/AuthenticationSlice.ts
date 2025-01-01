@@ -7,9 +7,10 @@ export const login = createAsyncThunk<
     { token: string; user: User }, // Fulfilled payload
     { email: string; password: string }, // Input arguments
     { rejectValue: string } // Rejected payload
->("auth/login", async (credentials, thunkAPI) => {
+>("/login", async (credentials, thunkAPI) => {
     try {
-        const response = await axiosInstance.post("/auth/login", credentials);
+        const response = await axiosInstance.post("/login", credentials);
+        console.log('response', response)
         localStorage.setItem("accessToken", response.data.token);
         return response.data;
     } catch (error) {

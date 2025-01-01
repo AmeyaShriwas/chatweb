@@ -4,6 +4,7 @@ import { CiUser, CiLogout } from "react-icons/ci";
 import { FiMessageSquare } from "react-icons/fi";
 import Chat from "./Chat";
 import Profile from "./Profile";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const logo: string = require("./../assets/logo.png");
@@ -12,11 +13,16 @@ const Dashboard = () => {
   const [height, setHeight] = useState<number>(window.innerHeight);
   const [selectedCategory, setSelectedCategory] = useState<string>("chat");
   const [expanded, setExpanded] = useState<boolean>(false);
+  const navigate = useNavigate()
 
   const handleNavClick = (category: string) => {
     setSelectedCategory(category); // Set category
     setExpanded(false); // Collapse the navbar
   };
+
+  const handleLogout = () => {
+    navigate('/')
+  }
 
   useEffect(() => {
     const fetchWidth = () => {
@@ -34,7 +40,7 @@ const Dashboard = () => {
 
   const RenderFunction = (category: string) => {
     if (category === "chat") {
-      return <Chat containerHeight={containerHeight}  />;
+      return <Chat containerHeight={containerHeight} />;
     }
     if (category === "profile") {
       return <Profile />;
@@ -68,7 +74,7 @@ const Dashboard = () => {
               <Nav.Link onClick={() => handleNavClick("notification")} href="#">
                 <FiMessageSquare /> Notification
               </Nav.Link>
-              <Nav.Link onClick={() => handleNavClick("logout")} href="#">
+              <Nav.Link onClick={handleLogout} href="#">
                 <CiLogout /> Logout
               </Nav.Link>
             </Nav>
