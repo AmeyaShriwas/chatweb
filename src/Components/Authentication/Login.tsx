@@ -4,6 +4,9 @@ import {Form, Button, Spinner} from 'react-bootstrap'
 import { TbLockPassword } from "react-icons/tb";
 import { login } from '../../Redux/Slices/AuthenticationSlice';
 import { useDispatch } from 'react-redux';
+import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
+
 
 interface LoginProps {
     setFormSelected: (form: string) => void
@@ -20,6 +23,7 @@ const Login:React.FC<LoginProps> = (props) => {
     const [error, setErrors] = useState<LoginData>({email: '', password: ''})
     const [loading, setLoading] = useState<boolean>(false); // Loading state
     const dispatch = useDispatch()
+    const navigate = useNavigate()
 
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>)=> {
@@ -62,7 +66,24 @@ const Login:React.FC<LoginProps> = (props) => {
                 setLoading(false)
             }, 2000)
             console.log('Login data:', data); // Proceed if no errors
-            dispatch(login(data) as any)
+            dispatch(login(data) as any).then((response:any )=> {
+                 console.log('res', response.payload)
+                 if(response.payload.message === 'login successful'){
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Login Success.',
+                      
+                      });
+                      navigate('/chat')
+                 }
+                 else{
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Error in Login.',
+                      
+                      });
+                 }
+            })
         }
     };
 
