@@ -34,7 +34,7 @@ const Dashboard = () => {
 
   const RenderFunction = (category: string) => {
     if (category === "chat") {
-      return <Chat containerHeight={containerHeight} mobileWidth={mobileWidth} setMobileWidth={setMobileWidth} />;
+      return <Chat containerHeight={containerHeight}  />;
     }
     if (category === "profile") {
       return <Profile />;
@@ -65,7 +65,9 @@ const Dashboard = () => {
               <Nav.Link onClick={() => handleNavClick("profile")} href="#">
                 <CiUser /> Profile
               </Nav.Link>
-             
+              <Nav.Link onClick={() => handleNavClick("notification")} href="#">
+                <FiMessageSquare /> Notification
+              </Nav.Link>
               <Nav.Link onClick={() => handleNavClick("logout")} href="#">
                 <CiLogout /> Logout
               </Nav.Link>
