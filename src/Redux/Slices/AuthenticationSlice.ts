@@ -2,14 +2,21 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axiosInstance from '../../Axios/axiosInstance';
 import { AxiosError } from 'axios';
 
+interface LoginResponse {
+    status: boolean; message: string, name: string, refreshToken: string, accessToken: string
+}
+interface LoginCredentials {
+    email: string; password: string 
+}
 // Login Async Thunk
 export const login = createAsyncThunk<
-    { token: string; user: User }, // Fulfilled payload
-    { email: string; password: string }, // Input arguments
+LoginResponse, // Fulfilled payload
+LoginCredentials, // Input arguments
     { rejectValue: string } // Rejected payload
 >("/login", async (credentials, thunkAPI) => {
     try {
         const response = await axiosInstance.post("/login", credentials);
+        console.log('response ', response)
         localStorage.setItem("accessToken", response.data.accessToken);
         return response.data;
     } catch (error) {
@@ -80,12 +87,12 @@ export const updatePassword = createAsyncThunk<{message: string}, {email: string
 
 interface User {
     name: string;
-    email: string;
+  
 }
 
 interface AuthState {
     isAuthenticated: boolean;
-    user: User | null;
+    user: string | null;
     token: string | null;
     loading: boolean;
     error: string | null
@@ -117,11 +124,11 @@ const authenticationSlice = createSlice({
                 state.loading = true;
                 state.error = "";
             })
-            .addCase(login.fulfilled, (state, action: PayloadAction<{ token: string, user: User }>) => {
+            .addCase(login.fulfilled, (state, action: PayloadAction<{ status: boolean; message: string, name: string, refreshToken: string, accessToken: string }>) => {
                 state.loading = false;
                 state.isAuthenticated = true;
-                state.token = action.payload.token;
-                state.user = action.payload.user;
+                state.token = action.payload?.accessToken;
+                state.user = action.payload?.name;
             })
             .addCase(
                 login.rejected,

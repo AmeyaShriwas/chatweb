@@ -11,14 +11,15 @@ interface SignupProps {
 interface SignupData {
     name: string,
     email: string,
-    password: string
+    password: string,
+    number: string
 }
 
 
 const Signup: React.FC<SignupProps> = (props) => {
     const { setFormSelected } = props;
-    const [data, setData] = useState<SignupData>({ name: "", email: "", password: "" });
-    const [error, setErrors] = useState<SignupData>({name: '', email: '', password: ''});
+    const [data, setData] = useState<SignupData>({ name: "", email: "", password: "", number: "" });
+    const [error, setErrors] = useState<SignupData>({name: '', email: '', password: '', number: ''});
     const [loading, setLoading] = useState<boolean>(false);
 
     const handleInputChange = (e:ChangeEvent<HTMLInputElement>) => {
@@ -53,6 +54,13 @@ const Signup: React.FC<SignupProps> = (props) => {
             errors.password = "Password must contain at least one uppercase letter";
         } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(data.password)) {
             errors.password = "Password must contain at least one special character";
+        }
+
+         // Email validation
+         if (data.number.trim().length === 0) {
+            errors.number = "Number is required";
+        } else if (data.number.length <10) {
+            errors.number = "Invalid number";
         }
 
         setErrors(errors as SignupData);
@@ -127,6 +135,23 @@ const Signup: React.FC<SignupProps> = (props) => {
                         />
                         <Form.Control.Feedback type="invalid">
                             {error.password}
+                        </Form.Control.Feedback>
+                    </div>
+                </Form.Group>
+                <Form.Group className="mb-3 w-100">
+                    <Form.Label>Number</Form.Label>
+                    <div className="input-group shadow-lg p-1 pl-3 d-flex justify-content-center align-items-center rounded">
+                        <TbLockPassword size={15} color="black" />
+                        <Form.Control
+                            type="number"
+                            name="number"
+                            placeholder="Enter number"
+                            onChange={handleInputChange}
+                            isInvalid={!!error.number}
+                            style={{ border: 'none', paddingLeft: '0.6rem' }}
+                        />
+                        <Form.Control.Feedback type="invalid">
+                            {error.number}
                         </Form.Control.Feedback>
                     </div>
                 </Form.Group>
