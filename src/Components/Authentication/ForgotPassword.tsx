@@ -1,6 +1,10 @@
 import React, { ChangeEvent, useState } from 'react';
 import { MdAlternateEmail } from "react-icons/md";
 import { Form, Button, Spinner } from 'react-bootstrap';
+import { forgotPassword } from '../../Redux/Slices/AuthenticationSlice';
+import { useDispatch } from 'react-redux';
+import Swal from 'sweetalert2';
+
 
 interface ForgotPasswordProps {
     setFormSelected : (form: string) => void
@@ -13,8 +17,9 @@ interface ForgotPasswordData {
 const ForgotPassword:React.FC<ForgotPasswordProps> = (props) => {
     const { setFormSelected } = props;
     const [data, setData] = useState<ForgotPasswordData>({ email: "" });
-    const [error, setErrors] = useState<ForgotPasswordData>({email: ''});
+    const [error, setErrors] = useState<Partial<ForgotPasswordData>>({email: ''});
     const [loading, setLoading] = useState<boolean>(false);
+    const dispatch = useDispatch()
 
     const handleInputChange = (e:ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -38,17 +43,26 @@ const ForgotPassword:React.FC<ForgotPasswordProps> = (props) => {
         return Object.keys(errors).length === 0;
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
+        console.log('data', data)
         if (validateErrors()) {
-            setLoading(true);
+          try{
+console.log('data', data)
+          const result = await dispatch(forgotPassword(data) as unknown as any)
+          const {status} = result.payload
+            Swal.fire({
+                                  title: status ? 'Success!' : 'Error!',
+                                  text: status ? 'successful.' : 'Not found.',
+                                });
+                      if(status){
+                          setFormSelected('verifyOtp')
+                      }
 
-            // Simulate an async operation
-            setTimeout(() => {
-                setLoading(false);
-                setFormSelected('verifyOtp'); // Navigate to verify OTP
-            }, 2000);
 
-            console.log("Submitted Email:", data.email);
+          }
+          catch(error){
+            console.log('error')
+          }
         }
     };
 

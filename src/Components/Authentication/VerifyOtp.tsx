@@ -1,12 +1,73 @@
-import React from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import { MdAlternateEmail } from "react-icons/md";
 import { Form, Button } from 'react-bootstrap';
+import { verifyOTP } from '../../Redux/Slices/AuthenticationSlice';
+import { useDispatch } from 'react-redux';
+import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
+
 
 interface VerifyOtpProps {
      setFormSelected: (form: string) => void
 }
 
+interface VerifyData {
+  email: string,
+  otp: string
+}
+
 const VerifyOtp:React.FC<VerifyOtpProps> = ({ setFormSelected }) => {
+   const[data, setData] = useState({email: "", otp: ""})
+   const [error, setErrors] = useState<Partial<VerifyData>>({email: "", otp: ""})
+   const dispatch = useDispatch()
+   const navigate = useNavigate()
+
+const handleChange = (e: ChangeEvent<HTMLInputElement>): void=> {
+    const{name, value} = e.target
+    setData((prev)=> ({
+       ...prev,
+       [name]: value
+    }))
+}
+
+const ValidateForm = (): boolean => {
+   const newErrors : Partial<VerifyData> = {}
+   if(!data.email){
+    newErrors.email = 'Email is required'
+   } 
+   else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)){
+    newErrors.email ='Email is invalid'
+   }
+
+   if(!data.otp){
+    newErrors.otp = "Otp is required"
+   }else if(data.otp.length === 0){
+    newErrors.otp = 'Invalid otp'
+   }
+  
+   setErrors(newErrors)
+   return Object.keys(newErrors).length  === 0
+}
+
+const handleSubmit = async()=> {
+   if(!ValidateForm()) return
+   try{
+    const result = await dispatch(verifyOTP(data) as unknown as any)
+    const {status} = result.payload
+
+     Swal.fire({
+            title: status ? 'Success!' : 'Error!',
+            text: status ? 'Verification successful.' : 'Verification failed.',
+          });
+    
+          if (status) setFormSelected('signup')
+
+   }
+   catch(error){
+    console.log('error')
+   }
+}
+
   return (
     <div 
       className="w-100 p-3" 
@@ -31,6 +92,8 @@ const VerifyOtp:React.FC<VerifyOtpProps> = ({ setFormSelected }) => {
               placeholder="Enter your registered email"
               style={{ border: 'none', paddingLeft: '0.6rem' }}
               aria-label="Email Address"
+              name='email'
+              onChange={handleChange}
             />
           </div>
         </Form.Group>
@@ -46,6 +109,8 @@ const VerifyOtp:React.FC<VerifyOtpProps> = ({ setFormSelected }) => {
               placeholder="Enter the OTP"
               style={{ border: 'none', paddingLeft: '0.6rem' }}
               aria-label="OTP"
+              name='otp'
+              onChange={handleChange}
             />
           </div>
         </Form.Group>
@@ -56,7 +121,7 @@ const VerifyOtp:React.FC<VerifyOtpProps> = ({ setFormSelected }) => {
             type="submit" 
             className="w-100" 
             variant="dark" 
-            onClick={() => setFormSelected('updatePassword')}
+            onClick={handleSubmit}
           >
             Verify OTP
           </Button>

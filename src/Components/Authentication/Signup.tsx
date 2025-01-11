@@ -3,6 +3,10 @@ import { MdAlternateEmail } from "react-icons/md";
 import { TbLockPassword } from "react-icons/tb";
 import { Form, Button, Spinner } from 'react-bootstrap';
 import { CiUser } from "react-icons/ci";
+import { signup } from '../../Redux/Slices/AuthenticationSlice';
+import { useDispatch } from 'react-redux';
+import Swal from 'sweetalert2';
+
 
 interface SignupProps {
     setFormSelected: (form: string) => void
@@ -21,7 +25,7 @@ const Signup: React.FC<SignupProps> = (props) => {
     const [data, setData] = useState<SignupData>({ name: "", email: "", password: "", number: "" });
     const [error, setErrors] = useState<SignupData>({name: '', email: '', password: '', number: ''});
     const [loading, setLoading] = useState<boolean>(false);
-
+    const dispatch = useDispatch()
     const handleInputChange = (e:ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setData((prev) => ({
@@ -67,14 +71,25 @@ const Signup: React.FC<SignupProps> = (props) => {
         return Object.keys(errors).length === 0;
     };
 
-    const handleSubmit = () => {
-        if (validateErrors()) {
-            setLoading(true);
-            setTimeout(() => {
-                setLoading(false);
-                console.log('Signup data:', data); // Proceed with API call or further logic
-            }, 2000);
+    const handleSubmit = async() => {
+        if (!validateErrors() )return 
+        try{
+            const result  = await dispatch(signup(data) as unknown as any)
+            console.log('result', result)
+            const {status} = result.payload
+        
+                 Swal.fire({
+                        title: status ? 'Success!' : 'Error!',
+                        text: status ? 'Signup successful.' : 'Signup failed.',
+                      });
+            if(status){
+                setFormSelected('verifyOtp')
+            }
         }
+        catch(error){
+            console.log('error')
+        }
+       
     };
 
     return (

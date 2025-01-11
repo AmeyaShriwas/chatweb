@@ -30,9 +30,10 @@ LoginCredentials, // Input arguments
     }
 });
 // Signup Async Thunk
-export const signup = createAsyncThunk<{message: string},{name: string, email: string, password: string},{rejectValue: string}>('auth/signup', async (userData, thunkAPI) => {
+export const signup = createAsyncThunk<{message: string},{name: string, email: string,number: string, password: string},{rejectValue: string}>('/signup', async (userData, thunkAPI) => {
     try {
-        const response = await axiosInstance.post('/auth/signup', userData);
+        const response = await axiosInstance.post('/signup', userData);
+        console.log('res', response)
         return response.data;
     } catch (error) {
         if (error instanceof AxiosError) {
@@ -44,9 +45,10 @@ export const signup = createAsyncThunk<{message: string},{name: string, email: s
 });
 
 // Forgot Password Async Thunk
-export const forgotPassword = createAsyncThunk<{message: string},{email: string}, {rejectValue: string}>('auth/forgotPassword', async (email, thunkAPI) => {
+export const forgotPassword = createAsyncThunk<{message: string},{email: string}, {rejectValue: string}>('/forgot-password', async (email, thunkAPI) => {
     try {
-        const response = await axiosInstance.post('/auth/forgot-password', { email });
+        console.log('email', email)
+        const response = await axiosInstance.post('/forgot-password', email);
         return response.data;
     } catch (error) {
         if (error instanceof AxiosError) {
@@ -58,9 +60,9 @@ export const forgotPassword = createAsyncThunk<{message: string},{email: string}
 });
 
 // Verify OTP Async Thunk
-export const verifyOTP = createAsyncThunk<{message: string}, {email: string, otp: string}, {rejectValue: string}>('auth/verifyOTP', async (otpData, thunkAPI) => {
+export const verifyOTP = createAsyncThunk<{message: string}, {email: string, otp: string}, {rejectValue: string}>('/verify-otp', async (otpData, thunkAPI) => {
     try {
-        const response = await axiosInstance.post('/auth/verify-otp', otpData);
+        const response = await axiosInstance.post('/verify-otp', otpData);
         return response.data;
     } catch (error) {
         if (error instanceof AxiosError) {
