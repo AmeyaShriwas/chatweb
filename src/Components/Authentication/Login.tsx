@@ -61,7 +61,7 @@ const Login: React.FC<LoginProps> = ({ setFormSelected }) => {
 
     try {
       const result = await dispatch(login(formData) as unknown as any);
-      
+      navigate('/chat');
       console.log('result', result)
       const { status } = result.payload;
 
