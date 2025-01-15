@@ -64,6 +64,7 @@ const Login: React.FC<LoginProps> = ({ setFormSelected }) => {
     
       console.log('result', result)
       const { status } = result.payload;
+      console.log('status', status)
 
       Swal.fire({
         title: status ? 'Success!' : 'Error!',
