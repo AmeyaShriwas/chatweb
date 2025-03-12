@@ -60,7 +60,7 @@ const handleSubmit = async()=> {
             text: status ? 'Verification successful.' : 'Verification failed.',
           });
     
-          if (status) setFormSelected('signup')
+          if (status) setFormSelected('login')
 
    }
    catch(error){
