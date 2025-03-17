@@ -3,7 +3,7 @@ import axiosInstance from '../../Axios/axiosInstance';
 import { AxiosError } from 'axios';
 
 interface LoginResponse {
-    status: boolean; message: string, name: string, refreshToken: string, accessToken: string
+    status: boolean; message: string, name: string, refreshToken: string, accessToken: string, id: string
 }
 interface LoginCredentials {
     email: string; password: string 
@@ -97,7 +97,8 @@ interface AuthState {
     user: string | null;
     token: string | null;
     loading: boolean;
-    error: string | null
+    error: string | null;
+    id: string | null
 }
 
 const initialState: AuthState = {
@@ -106,6 +107,8 @@ const initialState: AuthState = {
     token: null,
     loading: false,
     error: null,
+    id: null
+
 };
 
 const authenticationSlice = createSlice({
@@ -118,6 +121,8 @@ const authenticationSlice = createSlice({
             state.token = "";
             state.user = null; // Add user nullification for logout
             localStorage.removeItem('accessToken');
+            state.id = null
+
         },
     },
     extraReducers: (builder) => {
@@ -126,11 +131,12 @@ const authenticationSlice = createSlice({
                 state.loading = true;
                 state.error = "";
             })
-            .addCase(login.fulfilled, (state, action: PayloadAction<{ status: boolean; message: string, name: string, refreshToken: string, accessToken: string }>) => {
+            .addCase(login.fulfilled, (state, action: PayloadAction<{ status: boolean; message: string, name: string, refreshToken: string, accessToken: string, id: string }>) => {
                 state.loading = false;
                 state.isAuthenticated = true;
                 state.token = action.payload?.accessToken;
                 state.user = action.payload?.name;
+                state.id = action.payload.id
             })
             .addCase(
                 login.rejected,
