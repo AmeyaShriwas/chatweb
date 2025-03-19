@@ -3,6 +3,8 @@ import { Navbar, Form } from "react-bootstrap";
 import { FaArrowLeft } from "react-icons/fa";
 import { IoImagesOutline, IoSend } from "react-icons/io5";
 import { CiSettings } from "react-icons/ci";
+import { useSelector } from "react-redux";
+import { RootState } from "../Redux/store";
 
 
 interface ChatBoxProps {
@@ -10,6 +12,8 @@ interface ChatBoxProps {
 }
 
 const ChatBox: React.FC<ChatBoxProps> = ({ onBack }) => {
+
+  const data = useSelector((state: RootState)=> state.chat.selectedFriend)
   return (
     <div className="d-flex flex-column h-100">
      <Navbar className="container-fluid border p-3 mt-2 d-flex justify-content-between align-items-center">
@@ -21,7 +25,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onBack }) => {
       style={{ cursor: "pointer" }}
     />
   )}
-  <p className="m-0 text-center flex-grow-1">Ameya Shriwas</p>
+  <p className="m-0 text-center flex-grow-1">{data?.name || ""}</p>
   <CiSettings
     className="ms-3"
     size={20}

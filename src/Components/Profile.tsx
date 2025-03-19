@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { VscAdd } from "react-icons/vsc";
+import { useSelector } from "react-redux";
+import axios from "axios";
+import { RootState } from "../Redux/store";
 
 const Profile = () => {
-  const profile = require("./../assets/profile.jpeg");
+  const defaultProfile = require("./../assets/profile.jpeg");
 
-  const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
-  const [step, setStep] = useState(1); // Step: 1 -> Enter Email, 2 -> Verify OTP
-  const [width, setWidth] = useState(window.innerWidth)
+  const [profileImg, setProfileImg] = useState<string>(defaultProfile);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [isPhone, setIsPhone] = useState(window.innerWidth <= 768);
+  const { id } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
     const handleResize = () => setIsPhone(window.innerWidth <= 768);
@@ -16,111 +19,137 @@ const Profile = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // ✅ Function to handle profile image upload
+  const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
 
-  useEffect(() => {
-    const fetchWidth = () => {
-      const updatedWidth = window.innerWidth - window.innerWidth * 40 / 100
-      console.log('inner width', window.innerWidth)
-      console.log('total', updatedWidth)
-      setWidth(updatedWidth)
+      const formData = new FormData();
+      formData.append("profilePicture", file);
+      formData.append("id", String(id));
+
+      try {
+        const response = await axios.post(
+          "https://api.chatwithus.ameyashriwas.com/addImage",
+          formData
+        );
+
+        if (response.data && response.data.imageUrl) {
+          setProfileImg(response.data.imageUrl);
+          alert("Profile image uploaded successfully!");
+        } else {
+          alert("Failed to upload image.");
+        }
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        alert("Failed to upload image.");
+      }
     }
-    fetchWidth()
-    window.addEventListener('resize', fetchWidth)
-  }, [window.innerWidth])
-
-  const handleUpdateEmailSubmit = () => {
-    // Simulate sending OTP
-    setStep(2);
   };
 
-  const handleVerifyOtp = () => {
-    // Simulate OTP verification
-    setStep(1); // Reset step for next use
-    setEmail("");
-    setOtp("");
-    // Close the modal
-  };
+  // ✅ Function to handle name and phone number update
+  const handleUpdateProfile = async () => {
+    try {
+      const response = await axios.put(
+        `https://api.chatwithus.ameyashriwas.com/user/update-profile/${id}`,
+        {
+          name,
+          phone,
+        }
+      );
 
-  const handleDeleteEmailSubmit = () => {
-    setStep(2);
-  };
-
-  const handleDeleteVerifyOtp = () => {
-    setStep(1);
-    setEmail("");
-    setOtp("");
+      alert("Profile updated successfully!");
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("Failed to update profile.");
+    }
   };
 
   return (
     <div className="container-fluid py-4">
       <div className="row justify-content-center">
-        {/* Profile Section */}
         <div className="col-lg-6 col-md-8 col-sm-10 col-12 rounded p-4 shadow-sm bg-white">
           <h4 className="text-center mb-4">Profile Details</h4>
 
-          {/* Profile Image Upload */}
+          {/* ✅ Profile Image Upload Section */}
           <div
-      style={{
-        display: "flex",
-        flexDirection: isPhone ? "column" : "row", // Stack vertically on phones
-        justifyContent: isPhone ? "center" : "space-around",
-        alignItems: isPhone ? "center" : "flex-start",
-        gap: "20px", // Spacing between elements
-      }}
-    >
-      <div
-        className="text-center mb-4"
-        style={{
-          position: "relative",
-          width: "200px",
-          margin: isPhone ? "10px auto" : "0",
-        }}
-      >
-        <img
-          src={profile}
-          alt="Profile"
-          className="rounded-circle mb-3"
-          style={{
-            height: "200px",
-            objectFit: "cover",
-            border: "1px solid grey",
-            borderRadius: "50%",
-            width: "100%",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            top: "5px",
-            right: "5px",
-          }}
-        >
-          <VscAdd size={30} />
-        </div>
-      </div>
-      <div
-        style={{
-          width: isPhone ? "90%" : "300px",
-          margin: isPhone ? "10px auto" : "0",
-        }}
-      >
-        <div style={{ padding: "5px" }}>Add your status</div>
-        <input
-          style={{
-            borderRadius: "5px",
-            border: "none",
-            backgroundColor: "#F5F5F5",
-            padding: "10px",
-            width: "100%",
-          }}
-          type="text"
-          placeholder="add your status"
-        />
-      </div>
-    </div>
+            style={{
+              display: "flex",
+              flexDirection: isPhone ? "column" : "row",
+              justifyContent: isPhone ? "center" : "space-around",
+              alignItems: "center",
+              gap: "20px",
+            }}
+          >
+            <div
+              className="text-center mb-4"
+              style={{
+                position: "relative",
+                width: "200px",
+                margin: isPhone ? "10px auto" : "0",
+              }}
+            >
+              <img
+                src={profileImg}
+                alt="Profile"
+                className="rounded-circle mb-3"
+                style={{
+                  height: "200px",
+                  objectFit: "cover",
+                  border: "1px solid grey",
+                  borderRadius: "50%",
+                  width: "100%",
+                }}
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                style={{
+                  position: "absolute",
+                  top: "0",
+                  left: "0",
+                  opacity: 0,
+                  width: "100%",
+                  height: "100%",
+                  cursor: "pointer",
+                }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  top: "5px",
+                  right: "5px",
+                  cursor: "pointer",
+                }}
+              >
+                <VscAdd size={30} />
+              </div>
+            </div>
 
+            <div
+              style={{
+                width: isPhone ? "90%" : "300px",
+                margin: isPhone ? "10px auto" : "0",
+              }}
+            >
+              <div style={{ padding: "5px" }}>Add your status</div>
+              <input
+                style={{
+                  borderRadius: "5px",
+                  border: "1px solid #ccc",
+                  backgroundColor: "#F5F5F5",
+                  padding: "10px",
+                  width: "100%",
+                }}
+                type="text"
+                placeholder="Add your status"
+              />
+            </div>
+          </div>
 
-          {/* User Details Form */}
+          {/* ✅ User Details Form */}
           <form>
             <div className="row g-3">
               <div className="col-md-6">
@@ -132,173 +161,34 @@ const Profile = () => {
                   className="form-control"
                   id="name"
                   placeholder="Enter your name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                 />
               </div>
               <div className="col-md-6">
-                <label htmlFor="email" className="form-label">
-                  Email
+                <label htmlFor="phone" className="form-label">
+                  Phone Number
                 </label>
                 <input
-                  type="email"
+                  type="text"
                   className="form-control"
-                  id="email"
-                  placeholder="Enter your email"
+                  id="phone"
+                  placeholder="Enter your phone number"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                 />
               </div>
             </div>
-            <div className="mt-3">
-              <label htmlFor="number" className="form-label">
-                Phone Number
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="number"
-                placeholder="Enter your phone number"
-              />
-            </div>
           </form>
 
-          {/* Action Buttons */}
-          <div className="mt-4 row" style={{ display: "flex", backgroundColor: "white" }}>
+          {/* ✅ Action Buttons */}
+          <div className="mt-4 row">
             <button
-              className="btn border w-100"
-              data-bs-toggle="modal"
-              data-bs-target="#updateModal"
+              className="btn btn-primary w-100"
+              onClick={handleUpdateProfile}
             >
-              Update Account
+              Update Profile
             </button>
-            <button
-              className="btn border mt-2 w-100"
-              data-bs-toggle="modal"
-              data-bs-target="#deleteModal"
-            >
-              Delete Account
-            </button>
-          </div>
-
-          {/* Update Account Modal */}
-          <div
-            className="modal fade"
-            id="updateModal"
-            aria-hidden="false"
-            style={{
-              width: `${width}`,
-              maxWidth: '500px',
-              height: '300px',
-              position: 'fixed',
-              top: '50%',
-              left: '50%',
-              borderRadius: '20px',
-              padding: '20px',
-              overflowY: 'hidden',
-              transform: 'translate(-50%, -50%)',
-            }}
-          >
-            <div className="modal-dialog">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">Update Account</h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    id="updateModalClose"
-                    data-bs-dismiss="modal"
-                  ></button>
-                </div>
-                <div className="modal-body">
-                  {step === 1 ? (
-                    <div>
-                      <label>Email</label>
-                      <input
-                        type="email"
-                        className="form-control mb-3"
-                        placeholder="Enter your email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                      />
-                      <button className="btn btn-primary w-100" onClick={handleUpdateEmailSubmit}>
-                        Send OTP
-                      </button>
-                    </div>
-                  ) : (
-                    <>
-                      <label>OTP</label>
-                      <input
-                        type="text"
-                        className="form-control mb-3"
-                        placeholder="Enter OTP"
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value)}
-                      />
-                      <button className="btn btn-primary w-100" onClick={handleVerifyOtp}>
-                        Verify OTP
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Delete Account Modal */}
-          <div className="modal fade" id="deleteModal" aria-hidden="false"
-            style={{
-              width: `${width}`,
-              maxWidth: '500px',
-              height: '300px',
-              position: 'fixed',
-              top: '50%',
-              left: '50%',
-              borderRadius: '20px',
-              padding: '20px',
-              overflowY: 'hidden',
-              transform: 'translate(-50%, -50%)',
-            }}>
-            <div className="modal-dialog">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">Delete Account</h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    id="deleteModalClose"
-                    data-bs-dismiss="modal"
-                  ></button>
-                </div>
-                <div className="modal-body">
-                  {step === 1 ? (
-                    <>
-                      <label>Email</label>
-                      <input
-                        type="email"
-                        className="form-control mb-3"
-                        placeholder="Enter your email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                      />
-                      <button className="btn btn-danger w-100" onClick={handleDeleteEmailSubmit}>
-                        Send OTP
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <label>OTP</label>
-                      <input
-                        type="text"
-                        className="form-control mb-3"
-                        placeholder="Enter OTP"
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value)}
-                      />
-                      <button className="btn btn-danger w-100" onClick={handleDeleteVerifyOtp}>
-                        Verify OTP
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>

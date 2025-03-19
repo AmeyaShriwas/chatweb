@@ -3,7 +3,7 @@ import axiosInstance from '../../Axios/axiosInstance';
 import { AxiosError } from 'axios';
 
 interface LoginResponse {
-    status: boolean; message: string, name: string, refreshToken: string, accessToken: string, id: string
+    status: boolean; message: string, name: string,image: string,email: string, refreshToken: string, accessToken: string, id: string 
 }
 interface LoginCredentials {
     email: string; password: string 
@@ -95,15 +95,19 @@ interface User {
 interface AuthState {
     isAuthenticated: boolean;
     user: string | null;
+    image: string | null;
+    email: string | null;
     token: string | null;
     loading: boolean;
     error: string | null;
-    id: string | null
+    id: string | null | undefined
 }
 
 const initialState: AuthState = {
     isAuthenticated: false,
     user: null,
+    image: null,
+    email:  null,
     token: null,
     loading: false,
     error: null,
@@ -120,6 +124,8 @@ const authenticationSlice = createSlice({
             state.error = null;
             state.token = "";
             state.user = null; // Add user nullification for logout
+            state.image = null;
+            state.email = null;
             localStorage.removeItem('accessToken');
             state.id = null
 
@@ -131,11 +137,13 @@ const authenticationSlice = createSlice({
                 state.loading = true;
                 state.error = "";
             })
-            .addCase(login.fulfilled, (state, action: PayloadAction<{ status: boolean; message: string, name: string, refreshToken: string, accessToken: string, id: string }>) => {
+            .addCase(login.fulfilled, (state, action: PayloadAction<{ status: boolean; message: string, name: string, image: string, email: string, refreshToken: string, accessToken: string, id: string }>) => {
                 state.loading = false;
                 state.isAuthenticated = true;
                 state.token = action.payload?.accessToken;
                 state.user = action.payload?.name;
+                state.image = action.payload.image;
+                state.email = action.payload.email;
                 state.id = action.payload.id
             })
             .addCase(
