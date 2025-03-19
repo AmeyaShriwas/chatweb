@@ -22,11 +22,11 @@ interface ChatBoxProps {
  
 }
 
-// ✅ Socket configuration
-const socket: Socket = io("https://api.chatwithus.ameyashriwas.com", {
-  transports: ["websocket"],
+const socket = io("https://api.chatwithus.ameyashriwas.com", {
+  transports: ["websocket", "polling"], // Allow both transports
   withCredentials: true,
 });
+
 
 
 
