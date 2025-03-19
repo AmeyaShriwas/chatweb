@@ -54,6 +54,7 @@ useEffect(() => {
     console.log("Attempting to join room...");
 
     socket.emit("joinRoom", { senderId, receiverId });
+    console.log('joined room')
 
     socket.on("connect", () => {
       console.log("✅ Socket connected:", socket.id);
@@ -112,16 +113,16 @@ const sendMessage = async () => {
     setMessage("");
 
     // Uncomment when saving to backend
-    // try {
-    //   console.log("💾 Saving message to backend...");
-    //   await axios.post(
-    //     "https://api.chatwithus.ameyashriwas.com/messages/send",
-    //     newMessage
-    //   );
-    //   console.log("✅ Message saved successfully.");
-    // } catch (error) {
-    //   console.error("❌ Error saving message:", error);
-    // }
+    try {
+      console.log("💾 Saving message to backend...");
+      await axios.post(
+        "https://api.chatwithus.ameyashriwas.com/messages/send",
+        newMessage
+      );
+      console.log("✅ Message saved successfully.");
+    } catch (error) {
+      console.error("❌ Error saving message:", error);
+    }
   } else {
     console.warn("⚠️ Empty message. Not sending.");
   }
