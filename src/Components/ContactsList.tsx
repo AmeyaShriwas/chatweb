@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { FaRegUserCircle } from "react-icons/fa";
 import { Form, Button, ListGroup } from "react-bootstrap";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
+import swal from "sweetalert";
 import { RootState } from "../Redux/store";
 import { setSelectedFriend } from "../Redux/Slices/ChatSlice";
+import { FaRegUserCircle } from "react-icons/fa";
 
 interface Contact {
   name: string;
   id: string;
+  image: string;
 }
 
 interface ContactsListProps {
@@ -25,35 +27,39 @@ const ContactsList: React.FC<ContactsListProps> = ({ onContactClick }) => {
   const [search, setSearch] = useState("");
   const [filteredUsers, setFilteredUsers] = useState<Contact[]>([]);
 
+  // ✅ Fetch Friends List
+  const fetchContacts = async () => {
+    try {
+      const { data } = await axios.get<{ friends: Contact[] }>(
+        `https://api.chatwithus.ameyashriwas.com/friend/friends/${userId}`
+      );
+      setContacts(data.friends);
+    } catch (error) {
+      console.error("Error fetching friends:", error);
+    }
+  };
+
+  // ✅ Fetch All Users
+  const fetchAllUsers = async () => {
+    try {
+      const { data } = await axios.get<Contact[]>(
+        "https://api.chatwithus.ameyashriwas.com/friend/allUser"
+      );
+      setAllUsers(data);
+    } catch (error) {
+      console.error("Error fetching all users:", error);
+    }
+  };
+
+  // ✅ Initial API calls
   useEffect(() => {
-    const fetchContacts = async () => {
-      try {
-        const { data } = await axios.get<{ friends: Contact[] }>(
-          `https://api.chatwithus.ameyashriwas.com/friend/friends/${userId}`
-        );
-        setContacts(data.friends);
-      } catch (error) {
-        console.error("Error fetching friends:", error);
-      }
-    };
-
-    const fetchAllUsers = async () => {
-      try {
-        const { data } = await axios.get<Contact[]>(
-          "https://api.chatwithus.ameyashriwas.com/friend/allUser"
-        );
-        setAllUsers(data);
-      } catch (error) {
-        console.error("Error fetching all users:", error);
-      }
-    };
-
     if (userId) {
       fetchContacts();
       fetchAllUsers();
     }
   }, [userId]);
 
+  // ✅ Filter users based on search
   useEffect(() => {
     if (search.trim()) {
       setFilteredUsers(
@@ -66,19 +72,25 @@ const ContactsList: React.FC<ContactsListProps> = ({ onContactClick }) => {
     }
   }, [search, allUsers]);
 
+  // ✅ Handle Add Friend with Refresh
   const handleAddFriend = async (friendId: string) => {
     try {
       await axios.post("https://api.chatwithus.ameyashriwas.com/friend/add-friend", {
         userId,
         friendId,
       });
-      alert("Friend added successfully!");
+
+      swal("Friend Added!", "Your friend has been added successfully.", "success");
+
+      // Refresh contacts after adding friend
+      fetchContacts();
     } catch (error) {
       console.error("Error adding friend:", error);
-      alert("Failed to add friend.");
+      swal("Failed", "Unable to add friend. Please try again.", "error");
     }
   };
 
+  // ✅ Handle Select Friend
   const handleSelectFriend = (friend: Contact) => {
     dispatch(setSelectedFriend(friend));
     if (onContactClick) {
@@ -87,49 +99,70 @@ const ContactsList: React.FC<ContactsListProps> = ({ onContactClick }) => {
   };
 
   return (
-    <div className="p-3" style={{ backgroundColor: "#fff", color: "#000" }}>
-      {/* Search Input */}
-      <Form.Group className="mb-3">
+    <div className="p-4" style={{ backgroundColor: "#fff", color: "#000", borderRadius: "8px" }}>
+      
+      {/* ✅ Search Input */}
+      <Form.Group className="mb-4">
         <Form.Control
           type="text"
           placeholder="Search users..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          style={{ borderColor: "#000" }}
+          style={{ borderColor: "#ccc", padding: "12px" }}
         />
       </Form.Group>
 
-      {/* Search Results */}
+      {/* ✅ Search Results */}
       {filteredUsers.length > 0 && (
-        <ListGroup className="mb-3">
+        <ListGroup className="mb-4">
           {filteredUsers.map((user) => (
             <ListGroup.Item
               key={user.id}
               className="d-flex justify-content-between align-items-center"
-              style={{ 
-                backgroundColor: "#fff", 
-                color: "#000", 
-                borderColor: "#ccc",
-                transition: "0.3s"
+              style={{
+                backgroundColor: "#f9f9f9",
+                color: "#000",
+                transition: "0.3s",
+                cursor: "pointer",
+                padding: "12px",
+                borderRadius: "8px",
+                marginBottom: "10px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e9e9e9")}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#f9f9f9")}
             >
               <div className="d-flex align-items-center">
-                <FaRegUserCircle className="me-2" style={{ fontSize: "1.5rem" }} />
-                <span className="fw-bold">{user.name}</span>
+                {user.image ? (
+                  <img
+                    src={`https://api.chatwithus.ameyashriwas.com${user.image}`}
+                    alt={user.name}
+                    style={{ 
+                      width: "45px",
+                      height: "45px",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      marginRight: "12px"
+                    }}
+                  />
+                ) : (
+                  <FaRegUserCircle className="me-2" style={{ fontSize: "2rem" }} />
+                )}
+                <span>{user.name}</span>
               </div>
               <Button 
                 size="sm" 
                 variant="dark" 
                 onClick={() => handleAddFriend(user.id)}
               >
-                Add Friend
+                Add
               </Button>
             </ListGroup.Item>
           ))}
         </ListGroup>
       )}
 
-      {/* Friends List */}
+      {/* ✅ Friends List */}
       <div className="overflow-auto" style={{ maxHeight: "500px" }}>
         {contacts.length > 0 ? (
           <ListGroup>
@@ -140,17 +173,32 @@ const ContactsList: React.FC<ContactsListProps> = ({ onContactClick }) => {
                 onClick={() => handleSelectFriend(contact)}
                 style={{
                   cursor: "pointer",
-                  backgroundColor: "#fff",
-                  color: selectedFriend?.id === contact.id ? "#000" : "#555",
+                  // backgroundColor: selectedFriend?.id === contact.id ? "white" : "white",
+                  color: "#000",
                   fontWeight: selectedFriend?.id === contact.id ? "bold" : "normal",
                   transition: "0.3s",
+                  padding: "12px",
                   borderBottom: "1px solid #ccc"
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f1f1f1"}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#fff"}
+                // onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f1f1f1"}
+                // onMouseLeave={(e) => e.currentTarget.style.backgroundColor = selectedFriend?.id === contact.id ? "#e9e9e9" : "#fff"}
               >
                 <div className="d-flex align-items-center">
-                  <FaRegUserCircle className="me-2" style={{ fontSize: "1.5rem" }} />
+                  {contact.image ? (
+                    <img
+                      src={`https://api.chatwithus.ameyashriwas.com${contact.image}`}
+                      alt={contact.name}
+                      style={{
+                        width: "45px",
+                        height: "45px",
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                        marginRight: "12px"
+                      }}
+                    />
+                  ) : (
+                    <FaRegUserCircle className="me-2" style={{ fontSize: "2rem" }} />
+                  )}
                   <span>{contact.name}</span>
                 </div>
               </ListGroup.Item>

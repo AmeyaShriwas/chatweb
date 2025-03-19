@@ -1,29 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { VscAdd } from "react-icons/vsc";
+import { VscAdd, VscTrash } from "react-icons/vsc";
 import { useSelector } from "react-redux";
 import axios from "axios";
+import Swal from "sweetalert2";
 import { RootState } from "../Redux/store";
 
 const Profile = () => {
-  const defaultProfile = require("./../assets/profile.jpeg");
-
-  const [profileImg, setProfileImg] = useState<string>(defaultProfile);
+  const [profileImg, setProfileImg] = useState<string>("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [isPhone, setIsPhone] = useState(window.innerWidth <= 768);
-  const { id } = useSelector((state: RootState) => state.auth);
 
+  const { id, image, email, user } = useSelector((state: RootState) => state.auth);
+
+  // ✅ Handle screen resize for responsiveness
   useEffect(() => {
     const handleResize = () => setIsPhone(window.innerWidth <= 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // ✅ Function to handle profile image upload
+  // ✅ Handle image upload
   const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
-
       const formData = new FormData();
       formData.append("profilePicture", file);
       formData.append("id", String(id));
@@ -34,125 +34,104 @@ const Profile = () => {
           formData
         );
 
-        if (response.data && response.data.imageUrl) {
-          setProfileImg(response.data.imageUrl);
-          alert("Profile image uploaded successfully!");
+        if (response.data && response.data.profilePicture) {
+          setProfileImg(response.data.profilePicture);
+          Swal.fire("Success", "Profile image uploaded successfully", "success");
         } else {
-          alert("Failed to upload image.");
+          Swal.fire("Error", "Failed to upload image", "error");
         }
       } catch (error) {
         console.error("Error uploading image:", error);
-        alert("Failed to upload image.");
+        Swal.fire("Error", "Failed to upload image", "error");
       }
     }
   };
 
-  // ✅ Function to handle name and phone number update
+  // ✅ Handle profile update
   const handleUpdateProfile = async () => {
     try {
       const response = await axios.put(
         `https://api.chatwithus.ameyashriwas.com/user/update-profile/${id}`,
-        {
-          name,
-          phone,
-        }
+        { name, phone }
       );
 
-      alert("Profile updated successfully!");
+      Swal.fire("Success", "Profile updated successfully", "success");
       console.log(response.data);
     } catch (error) {
       console.error("Error updating profile:", error);
-      alert("Failed to update profile.");
+      Swal.fire("Error", "Failed to update profile", "error");
     }
   };
 
+  // ✅ Handle profile deletion
+  const handleDeleteProfile = async () => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!"
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await axios.delete(`https://api.chatwithus.ameyashriwas.com/user/delete-profile/${id}`);
+          Swal.fire("Deleted!", "Your profile has been deleted.", "success");
+        } catch (error) {
+          console.error("Error deleting profile:", error);
+          Swal.fire("Error", "Failed to delete profile", "error");
+        }
+      }
+    });
+  };
+
   return (
-    <div className="container-fluid py-4">
+    <div className="container py-5">
       <div className="row justify-content-center">
         <div className="col-lg-6 col-md-8 col-sm-10 col-12 rounded p-4 shadow-sm bg-white">
           <h4 className="text-center mb-4">Profile Details</h4>
 
           {/* ✅ Profile Image Upload Section */}
           <div
-            style={{
-              display: "flex",
-              flexDirection: isPhone ? "column" : "row",
-              justifyContent: isPhone ? "center" : "space-around",
-              alignItems: "center",
-              gap: "20px",
-            }}
+            className={`d-flex ${isPhone ? "flex-column" : "flex-row"} justify-content-around align-items-center gap-4`}
           >
-            <div
-              className="text-center mb-4"
-              style={{
-                position: "relative",
-                width: "200px",
-                margin: isPhone ? "10px auto" : "0",
-              }}
-            >
-              <img
-                src={profileImg}
-                alt="Profile"
-                className="rounded-circle mb-3"
-                style={{
-                  height: "200px",
-                  objectFit: "cover",
-                  border: "1px solid grey",
-                  borderRadius: "50%",
-                  width: "100%",
-                }}
-              />
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                style={{
-                  position: "absolute",
-                  top: "0",
-                  left: "0",
-                  opacity: 0,
-                  width: "100%",
-                  height: "100%",
-                  cursor: "pointer",
-                }}
-              />
+            <div className="position-relative text-center">
               <div
+                className="rounded-circle overflow-hidden"
                 style={{
-                  position: "absolute",
-                  top: "5px",
-                  right: "5px",
+                  width: "180px",
+                  height: "180px",
+                  border: "2px solid #ccc",
                   cursor: "pointer",
+                  transition: "0.3s",
+                  boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
                 }}
+                onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+                onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
               >
+                <img
+                  src={`https://api.chatwithus.ameyashriwas.com${profileImg || image}`}
+                  alt="Profile"
+                  className="w-100 h-100"
+                  style={{ objectFit: "cover" }}
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="position-absolute top-0 start-0 w-100 h-100"
+                  style={{ opacity: 0, cursor: "pointer" }}
+                />
+              </div>
+              <div className="mt-2">
                 <VscAdd size={30} />
               </div>
             </div>
 
-            <div
-              style={{
-                width: isPhone ? "90%" : "300px",
-                margin: isPhone ? "10px auto" : "0",
-              }}
-            >
-              <div style={{ padding: "5px" }}>Add your status</div>
-              <input
-                style={{
-                  borderRadius: "5px",
-                  border: "1px solid #ccc",
-                  backgroundColor: "#F5F5F5",
-                  padding: "10px",
-                  width: "100%",
-                }}
-                type="text"
-                placeholder="Add your status"
-              />
-            </div>
-          </div>
-
-          {/* ✅ User Details Form */}
-          <form>
-            <div className="row g-3">
-              <div className="col-md-6">
+            {/* ✅ User Details Form */}
+            <div style={{ width: isPhone ? "90%" : "60%" }}>
+              <div className="mb-3">
                 <label htmlFor="name" className="form-label">
                   Name
                 </label>
@@ -165,7 +144,8 @@ const Profile = () => {
                   onChange={(e) => setName(e.target.value)}
                 />
               </div>
-              <div className="col-md-6">
+
+              <div className="mb-3">
                 <label htmlFor="phone" className="form-label">
                   Phone Number
                 </label>
@@ -179,15 +159,22 @@ const Profile = () => {
                 />
               </div>
             </div>
-          </form>
+          </div>
 
           {/* ✅ Action Buttons */}
-          <div className="mt-4 row">
+          <div className="d-flex justify-content-between mt-4">
             <button
-              className="btn btn-primary w-100"
+              className="btn btn-primary w-50 me-2"
               onClick={handleUpdateProfile}
             >
               Update Profile
+            </button>
+            <button
+              className="btn btn-danger w-50"
+              onClick={handleDeleteProfile}
+            >
+              <VscTrash size={20} className="me-2" />
+              Delete Profile
             </button>
           </div>
         </div>
