@@ -34,7 +34,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onBack}) => {
   const [message, setMessage] = useState<string>("");
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
   const [senderId, setSenderId] = useState(useSelector((state: RootState)=> state.auth.id))
-  const [receiverId, setReceiverId] = useState(useSelector((state: RootState) => state.chat.selectedFriend.id))
+  const [receiverId, setReceiverId] = useState(useSelector((state: RootState) => state.chat.selectedFriend?._id))
 
 
   const data = useSelector((state: RootState) => state.chat.selectedFriend);
@@ -45,57 +45,88 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onBack}) => {
     
   // }, [data, id])
 
-  // ✅ Fetch chat history on mount
-  useEffect(() => {
-    if (senderId && receiverId) {
-      socket.emit("joinRoom", { senderId, receiverId });
+ // ✅ Fetch chat history on mount
+useEffect(() => {
+  console.log("Checking senderId:", senderId);
+  console.log("Checking receiverId:", receiverId);
 
-      socket.on("loadMessages", (messages: Message[]) => {
-        setChatHistory(messages);
-      });
+  if (senderId && receiverId) {
+    console.log("Attempting to join room...");
 
-      socket.on("newMessage", (msg: Message) => {
-        setChatHistory((prev) => [...prev, msg]);
-      });
+    socket.emit("joinRoom", { senderId, receiverId });
 
-      return () => {
-        socket.off("loadMessages");
-        socket.off("newMessage");
-        socket.disconnect();
-      };
-    }
-  }, [senderId, receiverId]);
+    socket.on("connect", () => {
+      console.log("✅ Socket connected:", socket.id);
+    });
 
-  // ✅ Send message function
-  const sendMessage = async () => {
-    if (message.trim()) {
-      const newMessage: Message = {
-        senderId,
-        receiverId,
-        message,
-        timestamp: new Date().toISOString(),
-      };
+    socket.on("connect_error", (error) => {
+      console.error("❌ Socket connection error:", error);
+    });
 
-      // Emit message to socket
-      socket.emit("sendMessage", newMessage);
+    socket.on("disconnect", (reason) => {
+      console.warn("⚠️ Socket disconnected:", reason);
+    });
 
-      // Optimistically update chat history
-      setChatHistory((prev) => [...prev, newMessage]);
+    socket.on("loadMessages", (messages: Message[]) => {
+      console.log("📥 Received messages:", messages);
+      setChatHistory(messages);
+    });
 
-      // Clear input field
-      setMessage("");
+    socket.on("newMessage", (msg: Message) => {
+      console.log("📩 New message received:", msg);
+      setChatHistory((prev) => [...prev, msg]);
+    });
 
-      // Save message to backend
-      // try {
-      //   await axios.post(
-      //     "https://api.chatwithus.ameyashriwas.com/messages/send",
-      //     newMessage
-      //   );
-      // } catch (error) {
-      //   console.error("Error saving message:", error);
-      // }
-    }
-  };
+    return () => {
+      console.log("🛑 Cleaning up socket listeners...");
+      socket.off("loadMessages");
+      socket.off("newMessage");
+      socket.disconnect();
+    };
+  } else {
+    console.log("❗ Missing senderId or receiverId. Cannot connect.");
+  }
+}, [senderId, receiverId]);
+
+// ✅ Send message function
+const sendMessage = async () => {
+  console.log("Attempting to send message:", message);
+
+  if (message.trim()) {
+    const newMessage: Message = {
+      senderId,
+      receiverId,
+      message,
+      timestamp: new Date().toISOString(),
+    };
+
+    console.log("📤 Emitting message:", newMessage);
+
+    // Emit message to socket
+    socket.emit("sendMessage", newMessage);
+
+    // Optimistically update chat history
+    setChatHistory((prev) => [...prev, newMessage]);
+
+    // Clear input field
+    setMessage("");
+
+    // Uncomment when saving to backend
+    // try {
+    //   console.log("💾 Saving message to backend...");
+    //   await axios.post(
+    //     "https://api.chatwithus.ameyashriwas.com/messages/send",
+    //     newMessage
+    //   );
+    //   console.log("✅ Message saved successfully.");
+    // } catch (error) {
+    //   console.error("❌ Error saving message:", error);
+    // }
+  } else {
+    console.warn("⚠️ Empty message. Not sending.");
+  }
+};
+
 
   return (
     <div className="d-flex flex-column h-100">

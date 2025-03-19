@@ -9,7 +9,7 @@ import { FaRegUserCircle } from "react-icons/fa";
 
 interface Contact {
   name: string;
-  id: string;
+  _id: string;
   image: string;
 }
 
@@ -117,7 +117,7 @@ const ContactsList: React.FC<ContactsListProps> = ({ onContactClick }) => {
         <ListGroup className="mb-4">
           {filteredUsers.map((user) => (
             <ListGroup.Item
-              key={user.id}
+              key={user._id}
               className="d-flex justify-content-between align-items-center"
               style={{
                 backgroundColor: "#f9f9f9",
@@ -153,7 +153,7 @@ const ContactsList: React.FC<ContactsListProps> = ({ onContactClick }) => {
               <Button 
                 size="sm" 
                 variant="dark" 
-                onClick={() => handleAddFriend(user.id)}
+                onClick={() => handleAddFriend(user._id)}
               >
                 Add
               </Button>
@@ -168,14 +168,14 @@ const ContactsList: React.FC<ContactsListProps> = ({ onContactClick }) => {
           <ListGroup>
             {contacts.map((contact) => (
               <ListGroup.Item
-                key={contact.id}
+                key={contact._id}
                 className="d-flex justify-content-between align-items-center"
                 onClick={() => handleSelectFriend(contact)}
                 style={{
                   cursor: "pointer",
                   // backgroundColor: selectedFriend?.id === contact.id ? "white" : "white",
                   color: "#000",
-                  fontWeight: selectedFriend?.id === contact.id ? "bold" : "normal",
+                  fontWeight: selectedFriend?._id === contact._id ? "bold" : "normal",
                   transition: "0.3s",
                   padding: "12px",
                   borderBottom: "1px solid #ccc"
