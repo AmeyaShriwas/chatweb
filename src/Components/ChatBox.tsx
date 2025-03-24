@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import io, { Socket } from "socket.io-client";
+import io from "socket.io-client";
 import axios from "axios";
 import { Navbar, Form } from "react-bootstrap";
 import { FaArrowLeft } from "react-icons/fa";
@@ -19,115 +19,112 @@ interface Message {
 // ✅ Props interface
 interface ChatBoxProps {
   onBack?: () => void;
- 
 }
 
-const socket = io("https://api.chatwithus.ameyashriwas.com", {
-  transports: ["websocket", "polling"], // Allow both transports
-  withCredentials: true,
-});
-
-
-
-
-const ChatBox: React.FC<ChatBoxProps> = ({ onBack}) => {
+const ChatBox: React.FC<ChatBoxProps> = ({ onBack }) => {
   const [message, setMessage] = useState<string>("");
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
-  const [senderId, setSenderId] = useState(useSelector((state: RootState)=> state.auth.id))
-  const [receiverId, setReceiverId] = useState(useSelector((state: RootState) => state.chat.selectedFriend?._id))
-
-
+  
+  // ✅ Use Redux values for sender and receiver IDs
+  const senderId = useSelector((state: RootState) => state.auth.id);
+  const receiverId = useSelector((state: RootState) => state.chat.selectedFriend?._id);
   const data = useSelector((state: RootState) => state.chat.selectedFriend);
-  // const {id: userId} = useSelector((state: RootState)=> state.auth)
-  // useEffect(()=> {
-  //   setSenderId(id)
-  //   setReceiverId(data.id)
-    
-  // }, [data, id])
 
- // ✅ Fetch chat history on mount
-useEffect(() => {
-  console.log("Checking senderId:", senderId);
-  console.log("Checking receiverId:", receiverId);
+  const [socket, setSocket] = useState<any>(null);
 
-  if (senderId && receiverId) {
-    console.log("Attempting to join room...");
-
-    socket.emit("joinRoom", { senderId, receiverId });
-    console.log('joined room')
-
-    socket.on("connect", () => {
-      console.log("✅ Socket connected:", socket.id);
+  // ✅ Initialize Socket Connection
+  useEffect(() => {
+    console.log("Initializing Socket...");
+    const newSocket = io("https://api.chatwithus.ameyashriwas.com", {
+      transports: ["websocket", "polling"],
+      withCredentials: true,
     });
 
-    socket.on("connect_error", (error) => {
-      console.error("❌ Socket connection error:", error);
-    });
+    setSocket(newSocket);
 
-    socket.on("disconnect", (reason) => {
-      console.warn("⚠️ Socket disconnected:", reason);
-    });
-
-    socket.on("loadMessages", (messages: Message[]) => {
-      console.log("📥 Received messages:", messages);
-      setChatHistory(messages);
-    });
-
-    socket.on("newMessage", (msg: Message) => {
-      console.log("📩 New message received:", msg);
-      setChatHistory((prev) => [...prev, msg]);
-    });
-
+    // ✅ Cleanup socket on unmount
     return () => {
-      console.log("🛑 Cleaning up socket listeners...");
-      socket.off("loadMessages");
-      socket.off("newMessage");
-      socket.disconnect();
+      console.log("🛑 Disconnecting socket...");
+      newSocket.disconnect();
     };
-  } else {
-    console.log("❗ Missing senderId or receiverId. Cannot connect.");
-  }
-}, [senderId, receiverId]);
+  }, []);
 
-// ✅ Send message function
-const sendMessage = async () => {
-  console.log("Attempting to send message:", message);
+  // ✅ Handle Room Joining and Socket Events
+  useEffect(() => {
+    if (socket && senderId && receiverId) {
+      console.log("Attempting to join room...");
+      socket.emit("joinRoom", { senderId, receiverId });
 
-  if (message.trim()) {
-    const newMessage: Message = {
-      senderId,
-      receiverId,
-      message,
-      timestamp: new Date().toISOString(),
-    };
+      socket.on("connect", () => {
+        console.log("✅ Socket connected:", socket.id);
+      });
 
-    console.log("📤 Emitting message:", newMessage);
+      socket.on("connect_error", (error: Error) => {
+        console.error("❌ Socket connection error:", error);
+      });
+      
+      socket.on("disconnect", (reason: string) => {
+        console.warn("⚠️ Socket disconnected:", reason);
+      });
+      
 
-    // Emit message to socket
-    socket.emit("sendMessage", newMessage);
+      socket.on("loadMessages", (messages: Message[]) => {
+        console.log("📥 Received messages:", messages);
+        setChatHistory(messages);
+      });
 
-    // Optimistically update chat history
-    setChatHistory((prev) => [...prev, newMessage]);
+      socket.on("newMessage", (msg: Message) => {
+        console.log("📩 New message received:", msg);
+        setChatHistory((prev) => [...prev, msg]);
+      });
 
-    // Clear input field
-    setMessage("");
-
-    // Uncomment when saving to backend
-    try {
-      console.log("💾 Saving message to backend...");
-      await axios.post(
-        "https://api.chatwithus.ameyashriwas.com/messages/send",
-        newMessage
-      );
-      console.log("✅ Message saved successfully.");
-    } catch (error) {
-      console.error("❌ Error saving message:", error);
+      // ✅ Cleanup socket events
+      return () => {
+        console.log("🛑 Cleaning up socket listeners...");
+        socket.off("loadMessages");
+        socket.off("newMessage");
+      };
     }
-  } else {
-    console.warn("⚠️ Empty message. Not sending.");
-  }
-};
+  }, [socket, senderId, receiverId]);
 
+  // ✅ Send message function
+  const sendMessage = async () => {
+    console.log("Attempting to send message:", message);
+
+    if (message.trim() && socket) {
+      const newMessage: Message = {
+        senderId,
+        receiverId,
+        message,
+        timestamp: new Date().toISOString(),
+      };
+
+      console.log("📤 Emitting message:", newMessage);
+
+      // Emit message to socket
+      socket.emit("sendMessage", newMessage);
+
+      // Optimistically update chat history
+      setChatHistory((prev) => [...prev, newMessage]);
+
+      // Clear input field
+      setMessage("");
+
+      // Save message to backend
+      try {
+        console.log("💾 Saving message to backend...");
+        await axios.post(
+          "https://api.chatwithus.ameyashriwas.com/messages/send",
+          newMessage
+        );
+        console.log("✅ Message saved successfully.");
+      } catch (error) {
+        console.error("❌ Error saving message:", error);
+      }
+    } else {
+      console.warn("⚠️ Empty message or no socket connection. Not sending.");
+    }
+  };
 
   return (
     <div className="d-flex flex-column h-100">
