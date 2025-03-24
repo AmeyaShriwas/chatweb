@@ -36,8 +36,11 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onBack }) => {
   useEffect(() => {
     console.log("Initializing Socket...");
     const newSocket = io("https://api.chatwithus.ameyashriwas.com", {
-      transports: ["websocket", "polling"],
+      transports: ["websocket", "polling"],   // Allow both transports
       withCredentials: true,
+      reconnection: true,                      // Auto-reconnect on failure
+      reconnectionAttempts: 5,                 // Retry 5 times before failing
+      reconnectionDelay: 1000,                 // Delay between retries (1 second)
     });
 
     setSocket(newSocket);
