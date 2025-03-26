@@ -25,74 +25,66 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onBack }) => {
   const [message, setMessage] = useState<string>("");
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
   
-  // ✅ Use Redux values for sender and receiver IDs
+  // ✅ Redux state for sender and receiver IDs
   const senderId = useSelector((state: RootState) => state.auth.id);
   const receiverId = useSelector((state: RootState) => state.chat.selectedFriend?._id);
   const data = useSelector((state: RootState) => state.chat.selectedFriend);
 
   const [socket, setSocket] = useState<any>(null);
 
-  // ✅ Initialize Socket Connection
+  // ✅ Connect socket only when a receiver is selected
   useEffect(() => {
-    console.log("Initializing Socket...");
-    const newSocket = io("https://api.chatwithus.ameyashriwas.com", {
-      transports: ["websocket", "polling"],   // Allow both transports
-      withCredentials: true,
-      reconnection: true,                      // Auto-reconnect on failure
-      reconnectionAttempts: 5,                 // Retry 5 times before failing
-      reconnectionDelay: 1000,                 // Delay between retries (1 second)
-    });
-
-    setSocket(newSocket);
-
-    // ✅ Cleanup socket on unmount
-    return () => {
-      console.log("🛑 Disconnecting socket...");
-      newSocket.disconnect();
-    };
-  }, []);
-
-  // ✅ Handle Room Joining and Socket Events
-  useEffect(() => {
-    if (socket && senderId && receiverId) {
-      console.log("Attempting to join room...");
-      socket.emit("joinRoom", { senderId, receiverId });
-
-      socket.on("connect", () => {
-        console.log("✅ Socket connected:", socket.id);
+    if (receiverId && senderId) {
+      console.log("🚀 Connecting socket...");
+      const newSocket = io("https://api.chatwithus.ameyashriwas.com", {
+        transports: ["websocket", "polling"],
+        withCredentials: true,
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
       });
 
-      socket.on("connect_error", (error: Error) => {
+      setSocket(newSocket);
+
+      newSocket.on("connect", () => {
+        console.log("✅ Socket connected:", newSocket.id);
+
+        // ✅ Join the room only when user is selected
+        console.log(`🔗 Joining room with sender: ${senderId}, receiver: ${receiverId}`);
+        newSocket.emit("joinRoom", { senderId, receiverId });
+
+        newSocket.on("loadMessages", (messages: Message[]) => {
+          console.log("📥 Loaded messages:", messages);
+          setChatHistory(messages);
+        });
+
+        newSocket.on("newMessage", (msg: Message) => {
+          console.log("📩 New message received:", msg);
+          setChatHistory((prev) => [...prev, msg]);
+        });
+      });
+
+      newSocket.on("connect_error", (error: Error) => {
         console.error("❌ Socket connection error:", error);
       });
-      
-      socket.on("disconnect", (reason: string) => {
+
+      newSocket.on("disconnect", (reason: string) => {
         console.warn("⚠️ Socket disconnected:", reason);
       });
-      
 
-      socket.on("loadMessages", (messages: Message[]) => {
-        console.log("📥 Received messages:", messages);
-        setChatHistory(messages);
-      });
-
-      socket.on("newMessage", (msg: Message) => {
-        console.log("📩 New message received:", msg);
-        setChatHistory((prev) => [...prev, msg]);
-      });
-
-      // ✅ Cleanup socket events
+      // ✅ Cleanup on unmount or user change
       return () => {
-        console.log("🛑 Cleaning up socket listeners...");
-        socket.off("loadMessages");
-        socket.off("newMessage");
+        console.log("🛑 Disconnecting socket...");
+        newSocket.off("loadMessages");
+        newSocket.off("newMessage");
+        newSocket.disconnect();
       };
     }
-  }, [socket, senderId, receiverId]);
+  }, [receiverId, senderId]);  // Only run when receiver or sender changes
 
   // ✅ Send message function
   const sendMessage = async () => {
-    console.log("Attempting to send message:", message);
+    console.log("📤 Attempting to send message:", message);
 
     if (message.trim() && socket) {
       const newMessage: Message = {
